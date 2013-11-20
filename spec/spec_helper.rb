@@ -1,11 +1,13 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'tdiary/comment_manager'
+require 'tdiary/comment'
 require 'tdiary/referer_manager'
 require 'tdiary/cache/file'
 require 'tdiary/io/mongodb'
 
 module TDiary
 	class TDiaryBase
+		DIRTY_NONE = 1
 		DIRTY_DIARY = 1
 		DIRTY_COMMENT = 2
 	end
@@ -64,6 +66,19 @@ class DummyStyle
 	end
 
 	def show(dummy); end
+
+	def add_comment(com)
+		@comments ||= []
+		@comments << com
+	end
+
+	def count_comments(dummy)
+		(@comments || []).size
+	end
+
+	def each_comment(limit)
+		(@comments || []).each{|com| yield com}
+	end
 end
 
 RSpec.configure do |c|

@@ -31,10 +31,10 @@ module TDiary
 				include Mongoid::Timestamps
 				store_in collection: "comments"
 
-				field :no, type: Integer
+				belongs_to :diary
 				field :name, type: String
 				field :mail, type: String
-				field :comment, type: String
+				field :body, type: String
 				field :last_modified, type: String
 				field :visible, type: Boolean
 			end
@@ -58,8 +58,8 @@ module TDiary
 				field :body, type: String
 				field :style, type: String
 				field :last_modified, type: Integer
-				has_many :comments
-				has_many :referers
+				has_many :comments, autosave: true
+				has_many :referers, autosave: true
 
 				index({diary_id: 1}, {unique: true})
 				index('comments.no' => 1)
@@ -104,13 +104,11 @@ module TDiary
 					diaries.update(cache)
 				else
 					restore(date.strftime("%Y%m%d"), diaries)
-					restore_comment(diaries)
 				end
 
 				dirty = yield(diaries) if iterator?
 
-				store(diaries) if (dirty & TDiary::TDiaryBase::DIRTY_DIARY) != 0
-				store_comment(diaries) if (dirty & TDiary::TDiaryBase::DIRTY_COMMENT) != 0
+				store(diaries, dirty)
 
 				store_parser_cache(date, diaries) if dirty || !cache
 			end
@@ -127,26 +125,6 @@ module TDiary
 				@tdiary.conf.cache_path || "#{Dir.tmpdir}/cache"
 			end
 
-			def restore_comment(diaries)
-				# not implemented yet
-				return
-			end
-
-			def store_comment(diaries)
-				# not implemented yet
-				return
-			end
-
-			def restore_referer(diaries)
-				# not implemented yet
-				return
-			end
-
-			def store_referer(diaries)
-				# not implemented yet
-				return
-			end
-
 		private
 
 			def restore(date, diaries, month = true)
@@ -159,32 +137,65 @@ module TDiary
 					style = (d.style.nil? || d.style.empty?) ? 'wiki' : d.style.downcase
 					diary = eval("#{style(style)}::new(d.diary_id, d.title, d.body, Time::at(d.last_modified.to_i))")
 					diary.show(d.visible)
+					d.comments.each do |c|
+						comment = TDiary::Comment.new(c.name, c.mail, c.body, Time.at(c.last_modified.to_i))
+						comment.show = c.visible
+						diary.add_comment(comment)
+					end
 					diaries[d.diary_id] = diary
 				end
 			end
 
-			def store(diaries)
-				diaries.each do |diary_id, diary|
-					year, month, day = diary_id.scan(/(\d{4})(\d\d)(\d\d)/).flatten
+			def store(diaries, dirty)
+				if dirty
+					diaries.each do |diary_id, diary|
+						year, month, day = diary_id.scan(/(\d{4})(\d\d)(\d\d)/).flatten
+	
+						entry = Diary.where(diary_id: diary_id).first
 
-					entry = Diary.where(diary_id: diary_id).first
-					if entry
-						entry.title = diary.title
-						entry.last_modified = diary.last_modified.to_i
-						entry.style = diary.style
-						entry.visible = diary.visible?
-						entry.body = diary.to_src
-						entry.save
-					else
-						Diary.create(
-							diary_id: diary_id,
-							year: year, month: month, day: day,
-							title: diary.title,
-							last_modified: diary.last_modified,
-							style: diary.style,
-							visible: diary.visible?,
-							body: diary.to_src
-						).save
+						if (dirty & TDiary::TDiaryBase::DIRTY_DIARY) != 0
+							if entry
+								entry.title = diary.title
+								entry.last_modified = diary.last_modified.to_i
+								entry.style = diary.style
+								entry.visible = diary.visible?
+								entry.body = diary.to_src
+								entry.save
+							else
+								Diary.create(
+									diary_id: diary_id,
+									year: year, month: month, day: day,
+									title: diary.title,
+									last_modified: diary.last_modified,
+									style: diary.style,
+									visible: diary.visible?,
+									body: diary.to_src
+								).save
+							end
+						end
+						if entry && ((dirty & TDiary::TDiaryBase::DIRTY_COMMENT) != 0)
+							exist_comments = entry.comments.size
+							no = 0
+							diary.each_comment(diary.count_comments(true)) do |com|
+								if no < exist_comments
+									entry.comments[no].name = com.name
+									entry.comments[no].mail = com.mail
+									entry.comments[no].body = com.body
+									entry.comments[no].last_modified = com.date.to_i
+									entry.comments[no].visible = com.visible?
+									no += 1
+								else
+									entry.comments.build(
+										name: com.name,
+										mail: com.mail,
+										body: com.body,
+										last_modified: com.date.to_i,
+										visible: com.visible?
+									)
+								end
+								entry.save
+							end
+						end
 					end
 				end
 			end
