@@ -58,6 +58,7 @@ module TDiary
 				field :body, type: String
 				field :style, type: String
 				field :last_modified, type: Integer
+				field :visible, type: Boolean
 				has_many :comments, autosave: true
 				has_many :referers, autosave: true
 
