@@ -65,6 +65,31 @@ module TDiary
 				index({diary_id: 1}, {unique: true})
 				index('comments.no' => 1)
 			end
+
+			class Plugin
+				include Mongoid::Document
+				include Mongoid::Timestamps
+				store_in collection: "plugins"
+
+				field :plugin, type: String
+				field :key, type: String
+				field :value, type: String
+
+				def self.get(plugin_name, key)
+					record = where(plugin: plugin_name, key: key).first
+					return record ? record.value : nil
+				end
+
+				def self.set(plugin_name, key, value)
+					record = where(plugin: plugin_name, key: key).first
+					if record
+						record.update(value: value)
+					else
+						record = self.new(plugin: plugin_name, key: key, value: value)
+						record.save!
+					end
+				end
+			end
 	
 			include Cache
 
@@ -92,6 +117,25 @@ module TDiary
 					@@_db ||= Mongoid::Config.load_configuration(
 						{sessions:{default:{uri:(conf.database_url || 'mongodb://localhost:27017/tdiary')}}}
 					)
+				end
+
+				def plugin_open(conf)
+					return nil
+				end
+
+				def plugin_close(storage)
+					# do nothing
+				end
+
+				def plugin_transaction(storage, plugin_name)
+					db = plugin_name.dup
+					def db.get(key)
+						Plugin.get(self, key)
+					end
+					def db.set(key, value)
+						Plugin.set(self, key, value)
+					end
+					yield db
 				end
 			end
 

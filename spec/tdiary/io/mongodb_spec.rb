@@ -26,6 +26,34 @@ describe TDiary::IO::MongoDB do
 		end
 	end
 
+	describe "plugin storage support" do
+		it ".plugin_open returns nil" do
+			expect(TDiary::IO::MongoDB.plugin_open(nil)).to be nil
+		end
+
+		it ".plugin_close do nothing" do
+			# nothing
+		end
+
+		describe ".plugin_transaction" do
+			let(:storage){ TDiary::IO::MongoDB.plugin_open(nil) }
+
+			it "store/restore data" do
+				TDiary::IO::MongoDB.plugin_transaction(storage, 'test_plugin') do |db|
+					db.set('test_key', 'test_value')
+					expect(db.get('test_key')).to eq('test_value')
+				end
+			end
+
+			it "update data" do
+				TDiary::IO::MongoDB.plugin_transaction(storage, 'test_plugin') do |db|
+					db.set('test_key', 'test_update')
+					expect(db.get('test_key')).to eq('test_update')
+				end
+			end
+		end
+	end
+
 	describe "#transaction" do
 		let(:io) { TDiary::IO::MongoDB.new(DummyTDiary.new) }
 		let(:today) { Time.now.strftime( '%Y%m%d' ) }
