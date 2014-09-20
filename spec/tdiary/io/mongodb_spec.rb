@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe TDiary::IO::MongoDB do
-	it 'is_a TDiary::IO::Base' do
-		expect { TDiary::IO::MongoDB.is_a?(TDiary::IO::Base) }.to be_true
+	it 'is based on TDiary::IO::Base' do
+		expect(TDiary::IO::MongoDB < TDiary::IO::Base).to be true
 	end
 
 	describe "#save_cgi_conf and #load_cgi_conf" do
