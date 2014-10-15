@@ -83,11 +83,23 @@ module TDiary
 				def self.set(plugin_name, key, value)
 					record = where(plugin: plugin_name, key: key).first
 					if record
-						record.update(value: value)
+						record.update_attributes(value: value)
 					else
 						record = self.new(plugin: plugin_name, key: key, value: value)
 						record.save!
 					end
+				end
+
+				def self.delete(plugin_name, key)
+					record = where(plugin: plugin_name, key: key).first
+					if record
+						record.delete
+					end
+				end
+
+				def self.keys(plugin_name)
+					records = where(plugin: plugin_name)
+					return records.map(&:key) rescue []
 				end
 			end
 	
@@ -134,6 +146,12 @@ module TDiary
 					end
 					def db.set(key, value)
 						Plugin.set(self, key, value)
+					end
+					def db.delete(key)
+						Plugin.delete(self, key)
+					end
+					def db.keys
+						Plugin.keys(self)
 					end
 					yield db
 				end

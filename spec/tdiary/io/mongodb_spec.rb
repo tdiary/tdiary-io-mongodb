@@ -51,6 +51,22 @@ describe TDiary::IO::MongoDB do
 					expect(db.get('test_key')).to eq('test_update')
 				end
 			end
+
+			it "delete data" do
+				TDiary::IO::MongoDB.plugin_transaction(storage, 'test_plugin') do |db|
+					db.set('test_key', 'test_delete')
+					db.delete('test_key')
+					expect(db.get('test_key')).to eq(nil)
+				end
+			end
+
+			it "keys" do
+				TDiary::IO::MongoDB.plugin_transaction(storage, 'test_plugin') do |db|
+					db.set('test_key1', 'test_value1')
+					db.set('test_key2', 'test_value2')
+					expect(db.keys).to match_array ['test_key1', 'test_key2']
+				end
+			end
 		end
 	end
 
