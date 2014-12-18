@@ -17,14 +17,14 @@ def load_diary(data_path, style_path)
 	options = {
 		'style.path' => style_path
 	}
-	
+
 	conf = OpenStruct.new
 	conf[:data_path] = "#{data_path}/"
 	conf[:options] = options
-	
+
 	tdiary = OpenStruct.new
 	tdiary[:conf] = conf
-	
+
 	default_io = TDiary::IO::Default.new(tdiary)
 	default_io.calendar.each do |y, ms|
 		ms.each do |m|
