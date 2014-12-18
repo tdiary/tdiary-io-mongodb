@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+
+require 'erb'
+require 'tdiary/view_helper'
+require 'tdiary/base'
+require 'tdiary/comment'
+require 'tdiary/comment_manager'
+require 'tdiary/referer_manager'
+require 'tdiary/style'
+require 'tdiary/cache/file'
+
+
+def load_diary(data_path, style_path)
+	require 'tdiary/io/default'
+	require 'ostruct'
+
+	options = {
+		'style.path' => style_path
+	}
+	
+	conf = OpenStruct.new
+	conf[:data_path] = "#{data_path}/"
+	conf[:options] = options
+	
+	tdiary = OpenStruct.new
+	tdiary[:conf] = conf
+	
+	default_io = TDiary::IO::Default.new(tdiary)
+	default_io.calendar.each do |y, ms|
+		ms.each do |m|
+			puts "loading #{y}-#{m}"
+			default_io.transaction(Time.local(y.to_i, m.to_i)) do |diaries|
+				diaries.each do |date, diary|
+					yield date, diary
+				end
+				TDiary::TDiaryBase::DIRTY_NONE
+			end
+		end
+	end
+end
+
+load_diary('data', %w(../../core/lib/tdiary/style)) do |date, diary|
+end
