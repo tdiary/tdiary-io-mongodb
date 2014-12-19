@@ -8,36 +8,55 @@ require 'tdiary/comment_manager'
 require 'tdiary/referer_manager'
 require 'tdiary/style'
 require 'tdiary/cache/file'
+require 'ostruct'
 
-
-def load_diary(data_path, style_path)
+def load_diaries(data_path, style_path)
 	require 'tdiary/io/default'
-	require 'ostruct'
 
 	options = {
 		'style.path' => style_path
 	}
-
-	conf = OpenStruct.new
-	conf[:data_path] = "#{data_path}/"
-	conf[:options] = options
-
-	tdiary = OpenStruct.new
-	tdiary[:conf] = conf
-
+	conf = OpenStruct.new({
+		data_path: "#{data_path}/",
+		options: options
+	})
+	tdiary = OpenStruct.new({conf: conf})
 	default_io = TDiary::IO::Default.new(tdiary)
+
 	default_io.calendar.each do |y, ms|
 		ms.each do |m|
 			puts "loading #{y}-#{m}"
-			default_io.transaction(Time.local(y.to_i, m.to_i)) do |diaries|
-				diaries.each do |date, diary|
-					yield date, diary
-				end
+			month = Time.local(y.to_i, m.to_i)
+			default_io.transaction(month) do |diaries|
+				yield month, diaries
 				TDiary::TDiaryBase::DIRTY_NONE
 			end
 		end
 	end
 end
 
-load_diary('data', %w(../../core/lib/tdiary/style)) do |date, diary|
+def update_diaries(mongodb_io, month, new_diaries)
+	mongodb_io.transaction(month) do |diaries|
+		diaries.update(new_diaries)
+		TDiary::TDiaryBase::DIRTY_DIARY | TDiary::TDiaryBase::DIRTY_COMMENT
+	end
 end
+
+def convert(data_path, style_path)
+	require 'tdiary/io/mongodb'
+
+	options = {
+		'style.path' => style_path,
+		'database_url' => nil,
+	}
+	conf = OpenStruct.new({options: options})
+	tdiary = OpenStruct.new({conf: conf})
+	TDiary::IO::MongoDB.load_cgi_conf(conf)
+	mongodb_io = TDiary::IO::MongoDB.new(tdiary)
+
+	load_diaries(data_path, style_path) do |month, diaries|
+		update_diaries(mongodb_io, month, diaries)
+	end
+end
+
+convert('data', %w(../../core/lib/tdiary/style))
