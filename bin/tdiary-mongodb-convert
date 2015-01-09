@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'optparse'
 require 'erb'
 require 'tdiary/view_helper'
 require 'tdiary/base'
@@ -42,14 +43,11 @@ def update_diaries(mongodb_io, month, new_diaries)
 	end
 end
 
-def convert(data_path, style_path)
+def store_diaries(data_path, style_path, mongo_url = nil)
 	require 'tdiary/io/mongodb'
 
-	options = {
-		'style.path' => style_path,
-		'database_url' => nil,
-	}
-	conf = OpenStruct.new({options: options})
+	options = {'style.path' => [style_path]}
+	conf = OpenStruct.new({options: options, database_url: mongo_url})
 	tdiary = OpenStruct.new({conf: conf})
 	TDiary::IO::MongoDB.load_cgi_conf(conf)
 	mongodb_io = TDiary::IO::MongoDB.new(tdiary)
@@ -59,4 +57,32 @@ def convert(data_path, style_path)
 	end
 end
 
-convert('data', %w(../../core/lib/tdiary/style))
+def store_conf(conf_path, mongo_url = nil)
+	require 'tdiary/io/mongodb'
+
+	conf = OpenStruct.new({options: {}, database_url: mongo_url})
+	tdiary = OpenStruct.new({conf: conf})
+
+	TDiary::IO::MongoDB.save_cgi_conf(conf, open(conf_path, &:read))
+end
+
+args = {}
+OptionParser.new do |opts|
+	opts.banner = 'Usage: tdiary-mongodb-convert [options] <data_path>'
+	opts.on('-c CONF', '--conf=CONF', 'store only tdiary.conf'){|v| args[:conf] = v}
+	opts.on('-s PATH', '--style=STYLE', 'style path'){|v| args[:style] = v}
+	opts.on('-m URL',  '--mongo=URL', 'URL of mongoDB'){|v| args[:mongo] = v}
+	opts.parse!(ARGV)
+
+	args[:data] = ARGV.shift
+	unless args[:data] || args[:conf]
+		$stderr.print opts.help
+		exit 1
+	end
+end
+
+if args[:conf]
+	store_conf(args[:conf], args[:mongo])
+else
+	store_diaries(args[:data], args[:style], args[:mongo])
+end
