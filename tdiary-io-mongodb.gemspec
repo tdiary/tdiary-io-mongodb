@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "tdiary-io-mongodb"
-  spec.version       = "0.0.1"
+  spec.version       = "0.0.2"
   spec.authors       = ["TADA Tadashi"]
   spec.email         = ["t@tdtds.jp"]
   spec.description   = %q{MongoDB adapter for tDiary}
