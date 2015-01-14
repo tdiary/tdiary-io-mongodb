@@ -223,9 +223,8 @@ module TDiary
 								entry.style = diary.style
 								entry.visible = diary.visible?
 								entry.body = diary.to_src
-								entry.save
 							else
-								Diary.create(
+								entry = Diary.create(
 									diary_id: diary_id,
 									year: year, month: month, day: day,
 									title: diary.title,
@@ -233,8 +232,9 @@ module TDiary
 									style: diary.style,
 									visible: diary.visible?,
 									body: diary.to_src
-								).save
+								)
 							end
+							entry.save
 						end
 						if entry && ((dirty & TDiary::TDiaryBase::DIRTY_COMMENT) != 0)
 							exist_comments = entry.comments.size
