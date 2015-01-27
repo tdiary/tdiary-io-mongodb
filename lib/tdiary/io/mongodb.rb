@@ -37,6 +37,8 @@ module TDiary
 				field :body, type: String
 				field :last_modified, type: String
 				field :visible, type: Boolean
+
+				index({diary_id: 1})
 			end
 	
 			class Referer
@@ -63,7 +65,7 @@ module TDiary
 				has_many :referers, autosave: true
 
 				index({diary_id: 1}, {unique: true})
-				index('comments.no' => 1)
+				index({year: 1, month: 1})
 			end
 
 			class Plugin
@@ -74,6 +76,8 @@ module TDiary
 				field :plugin, type: String
 				field :key, type: String
 				field :value, type: String
+
+				index({plugin: 1, key: 1}, {unique: true})
 
 				def self.get(plugin_name, key)
 					record = where(plugin: plugin_name, key: key).first
