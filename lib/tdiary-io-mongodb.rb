@@ -1,0 +1,1 @@
+require 'tdiary/io/mongodb'
