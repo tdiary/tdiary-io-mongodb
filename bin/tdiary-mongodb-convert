@@ -10,6 +10,7 @@ require 'tdiary/referer_manager'
 require 'tdiary/style'
 require 'tdiary/cache/file'
 require 'ostruct'
+require 'tdiary/core_ext'
 
 def load_diaries(data_path, style_path)
 	require 'tdiary/io/default'
