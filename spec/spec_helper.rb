@@ -83,7 +83,7 @@ end
 
 RSpec.configure do |c|
 	c.after(:suite) do
-		Mongoid.default_session.collections.each do |collection|
+		Mongoid.default_client.database.collections.each do |collection|
 			collection.drop
 		end
 	end

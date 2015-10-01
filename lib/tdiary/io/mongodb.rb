@@ -110,6 +110,8 @@ module TDiary
 			include Cache
 
 			class << self
+				Mongo::Logger.level = Logger::WARN
+
 				def load_cgi_conf(conf)
 					db(conf)
 					if cgi_conf = Conf.all.first
@@ -131,7 +133,7 @@ module TDiary
 
 				def db(conf)
 					@@_db ||= Mongoid::Config.load_configuration(
-						{sessions:{default:{uri:(conf.database_url || 'mongodb://localhost:27017/tdiary')}}}
+						{clients:{default:{uri:(conf.database_url || 'mongodb://localhost:27017/tdiary')}}}
 					)
 				end
 
