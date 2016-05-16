@@ -20,6 +20,39 @@ Add follow snipet to your tdiary.conf
 @io_class = TDiary::IO::MongoDB
 ```
 
+## Migration
+
+`bin/tdiary-mongodb-convert` is utility that uploads tDiary default IO data to MongoDB.
+
+(1) Migrate tDiary configuration
+
+Migrate your tDiary configuration to MongoDB.
+
+```
+$ bundle exec tdiary-mongodb-convert -c $DATA_PATH/tdiary.conf -m $MONGODB_URI
+```
+
+ * $MONGODB_URI: the uri of mongodb (mongodb://)
+ * $DATA_PATH: the path of your tdiary data directory
+
+(2) Migrate tDiary data
+
+Migrate your tDiary data to MongoDB.
+
+```
+$ bundle exec tdiary-mongodb-convert -s ./lib/tdiary/style -m $MONGODB_URI $DATA_PATH
+```
+ * $MONGODB_URI: the uri of mongodb (mongodb://)
+ * $DATA_PATH: the path of your tdiary data directory
+
+### Note
+
+If you use BlogRD style, append `gem 'tdiary-style-rd'` to Gemfile and run `bundle`.
+
+### See also
+
+ * http://sho.tdiary.net/20150206.html#p01 (in Japanese)
+
 ## Contributing
 
 1. Fork it
