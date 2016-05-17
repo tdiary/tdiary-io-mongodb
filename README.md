@@ -47,7 +47,13 @@ $ bundle exec tdiary-mongodb-convert -s ./lib/tdiary/style -m $MONGODB_URI $DATA
 
 ### Note
 
-If you use BlogRD style, append `gem 'tdiary-style-rd'` to Gemfile and run `bundle`.
+If you use the style provided by an external gem (like GFM style), append the gem to Gemfile and run `bundle`.
+
+```
+gem 'tdiary-style-gfm'
+gem 'tdiary-style-etdiary'
+gem 'tdiary-style-rd
+```
 
 ### See also
 
