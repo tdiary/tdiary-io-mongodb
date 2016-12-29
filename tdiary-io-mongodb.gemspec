@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "tdiary-io-mongodb"
-  spec.version       = "4.2.0.1"
+  spec.version       = "5.0.3"
   spec.authors       = ["TADA Tadashi"]
   spec.email         = ["t@tdtds.jp"]
   spec.description   = %q{MongoDB adapter for tDiary}
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "mongoid", "~> 5.0"
+  spec.add_dependency "mongoid", "~> 6.0"
   spec.add_dependency "hikidoc"
 
   spec.add_development_dependency "bundler", "~> 1.3"
