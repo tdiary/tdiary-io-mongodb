@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "mongoid", "~> 6.0"
   spec.add_dependency "hikidoc"
-  spec.add_dependency "tdiary"
+  spec.add_dependency "tdiary", ">= 5.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
