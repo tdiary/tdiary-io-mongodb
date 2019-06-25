@@ -31,7 +31,7 @@ module TDiary
 				include Mongoid::Timestamps
 				store_in collection: "comments"
 
-				belongs_to :diary
+				belongs_to :diary, class_name: 'TDiary::IO::MongoDB::Diary'
 				field :name, type: String
 				field :mail, type: String
 				field :body, type: String
@@ -61,8 +61,8 @@ module TDiary
 				field :style, type: String
 				field :last_modified, type: Integer
 				field :visible, type: Boolean
-				has_many :comments, autosave: true
-				has_many :referers, autosave: true
+				has_many :comments, autosave: true, class_name: 'TDiary::IO::MongoDB::Comment'
+				has_many :referers, autosave: true, class_name: 'TDiary::IO::MongoDB::Referer'
 
 				index({diary_id: 1}, {unique: true})
 				index({year: 1, month: 1})
