@@ -191,7 +191,7 @@ module TDiary
 				}
 				calendar = Hash.new{|hash, key| hash[key] = []}
 				Diary.collection.aggregate([mongo_project]).map do |cal|
-					calendar[cal['_id']['year']] = cal['_id']['month']
+					calendar[cal['_id']['year']] << cal['_id']['month']
 				end
 				calendar
 			end
