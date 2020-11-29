@@ -183,9 +183,15 @@ module TDiary
 			end
 
 			def calendar
+				mongo_project = {
+					"$group" => {
+						"_id" => {"year" => "$year", "month" => "$month"},
+						"count" => {"$sum" => 1}
+					}
+				}
 				calendar = Hash.new{|hash, key| hash[key] = []}
-				Diary.all.map{|d|[d.year, d.month]}.sort.uniq.each do |ym|
-					calendar[ym[0]] << ym[1]
+				Diary.collection.aggregate([mongo_project]).map do |cal|
+					calendar[cal['_id']['year']] << cal['_id']['month']
 				end
 				calendar
 			end
