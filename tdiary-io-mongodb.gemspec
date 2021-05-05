@@ -17,8 +17,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "mongoid", "~> 7.0"
-  spec.add_dependency "mongo", "< 2.9.0"
+  spec.add_dependency "mongoid", "~> 7.2"
+  spec.add_dependency "mongo", "~> 2.14"
   spec.add_dependency "hikidoc"
   spec.add_dependency "tdiary", ">= 5.0"
 
