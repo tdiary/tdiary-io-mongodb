@@ -37,7 +37,7 @@ end
 
 class DummyConf
 	def database_url
-		'mongodb://localhost:27017/tdiary_test'
+		ENV['MONGODB_URI'] || 'mongodb://localhost:27017/tdiary_test'
 	end
 
 	def cache_path
